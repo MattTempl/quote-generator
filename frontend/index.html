@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quote Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">✨</span>
+                <h1>QuoteBot AI</h1>
+            </div>
+            <p class="subtitle">Intelligent Sales Engineer</p>
+        </header>
+
+        <main id="chat-container" class="chat-container">
+            <div class="message bot-message">
+                Hello! I can generate accurate quotes for you. Try asking: <br>
+                <em>"I need 2 leather sofas and a floor lamp."</em>
+            </div>
+        </main>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Describe what you need..." autocomplete="off">
+            <button id="send-btn">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function addMessage(text, isUser = false, quoteData = null) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            if (quoteData) {
+                // Render Quote Card
+                let tableRows = quoteData.line_items.map(item => `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>x${item.quantity}</td>
+                        <td class="price">$${item.line_total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                `).join('');
+
+                div.innerHTML = `
+                    <div class="quote-header">${text}</div>
+                    <div class="quote-card">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2">Subtotal</td>
+                                    <td>$${quoteData.subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">Tax (8%)</td>
+                                    <td>$${quoteData.tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td colspan="2">TOTAL</td>
+                                    <td>$${quoteData.total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+            } else {
+                div.innerHTML = text; // Allow HTML for line breaks
+            }
+            
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            userInput.value = '';
+            
+            // Loading state
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot-message loading';
+            loadingDiv.innerHTML = '<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
+            chatContainer.appendChild(loadingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message: text })
+                });
+                
+                const data = await response.json();
+                chatContainer.removeChild(loadingDiv);
+                
+                if (data.data) {
+                    addMessage(data.message, false, data.data);
+                } else {
+                    addMessage(data.message || "Sorry, I encountered an error.", false);
+                }
+
+            } catch (err) {
+                chatContainer.removeChild(loadingDiv);
+                addMessage(`Error: ${err.message}`, false);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

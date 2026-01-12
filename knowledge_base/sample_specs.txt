@@ -1,0 +1,15 @@
+# Technical Specifications
+
+## Premium Heat Pump (HVAC-001)
+- Efficiency: 22 SEER
+- Noise Level: 45dB
+- Warranty: 10 Years Parts & Labor
+- Recommended for: Homes 2000-3000 sq ft
+- Requires: 220V connection, Install Kit A
+
+## Standard AC Unit (HVAC-002)
+- Efficiency: 16 SEER
+- Noise Level: 60dB
+- Warranty: 5 Years Parts
+- Recommended for: Homes 1000-2000 sq ft
+- Requires: 220V connection
