@@ -100,6 +100,7 @@ async def chat_endpoint(request: ChatRequest):
         calc_input = []
         for item in found_items:
             calc_input.append({
+                "sku": item['SKU'],
                 "name": item['Name'],
                 "price": float(item['Price']),
                 "quantity": item['quantity']

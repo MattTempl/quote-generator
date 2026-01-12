@@ -28,6 +28,7 @@ def calculate_quote(items_input):
         line_total = price * qty
         subtotal += line_total
         detailed_lines.append({
+            "sku": item.get('sku', 'N/A'),
             "name": item.get('name'),
             "quantity": qty,
             "unit_price": price,
@@ -37,11 +38,13 @@ def calculate_quote(items_input):
     # Simple hardcoded tax for demo
     tax_rate = 0.08
     tax = subtotal * tax_rate
-    total = subtotal + tax
+    discount = 0.00
+    total = subtotal + tax - discount
 
     return {
         "line_items": detailed_lines,
         "subtotal": subtotal,
+        "discounts": discount,
         "tax": tax,
         "total": total
     }
