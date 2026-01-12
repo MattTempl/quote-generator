@@ -61,7 +61,7 @@ def call_real_llm(prompt):
             import anthropic
             client = anthropic.Anthropic(api_key=claude_key)
             response = client.messages.create(
-                model="claude-3-5-sonnet-20240620",
+                model="claude-3-haiku-20240307",
                 max_tokens=1024,
                 messages=[{"role": "user", "content": prompt}]
             )
