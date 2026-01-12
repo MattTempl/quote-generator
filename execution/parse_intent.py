@@ -76,10 +76,11 @@ def call_real_llm(prompt):
         except Exception as e:
             print(f"Gemini API Error: {e}")
             # return mock_llm_response(prompt) # DON'T FALLBACK SILENTLY
+            # return mock_llm_response(prompt) # DON'T FALLBACK SILENTLY
             return json.dumps({
-                "intent": "error", 
-                "error": str(e),
-                "details": "The AI service encountered an error. It might be rate-limited."
+                "intent": "chat", 
+                "conversational_reply": f"System Error: {str(e)}", 
+                "selected_products": []
             })
             
     elif openai_key:
