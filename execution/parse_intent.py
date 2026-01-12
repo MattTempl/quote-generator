@@ -54,8 +54,27 @@ def call_real_llm(prompt):
     """
     gemini_key = os.getenv("GEMINI_API_KEY")
     openai_key = os.getenv("OPENAI_API_KEY")
+    claude_key = os.getenv("CLAUDE_API_KEY")
     
-    if gemini_key:
+    if claude_key:
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=claude_key)
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20240620",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
+        except Exception as e:
+            print(f"Claude API Error: {e}")
+            return json.dumps({
+                "intent": "chat", 
+                "conversational_reply": f"Claude API Error: {str(e)}", 
+                "selected_products": []
+            })
+            
+    elif gemini_key:
         try:
             import google.generativeai as genai
             genai.configure(api_key=gemini_key)
