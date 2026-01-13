@@ -61,23 +61,32 @@ def call_real_llm(prompt):
             import anthropic
             client = anthropic.Anthropic(api_key=claude_key)
             
-            # Try Premium Model First (Sonnet 3.5)
+            # Try Premium Model First (Sonnet 3.5 - Stable June Release)
             try:
                 response = client.messages.create(
-                    model="claude-3-5-sonnet-20241022",
+                    model="claude-3-5-sonnet-20240620",
                     max_tokens=1024,
                     messages=[{"role": "user", "content": prompt}]
                 )
                 return response.content[0].text
             except Exception as e:
-                # If Premium fails (e.g. 404 Not Found due to tier), fallback to Haiku
-                print(f"Sonnet Failed ({e}), falling back to Haiku...")
-                response = client.messages.create(
-                    model="claude-3-haiku-20240307",
-                    max_tokens=1024,
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                return response.content[0].text
+                # If Premium fails (e.g. 404 Not Found due to tier), fallback to 'claude-3-sonnet-20240229' before Haiku
+                try:
+                    print(f"Sonnet 3.5 Failed ({e}), trying Sonnet 3.0...")
+                    response = client.messages.create(
+                        model="claude-3-sonnet-20240229",
+                        max_tokens=1024,
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    return response.content[0].text
+                except Exception as e2:
+                    print(f"Sonnet 3.0 Failed ({e2}), falling back to Haiku...")
+                    response = client.messages.create(
+                        model="claude-3-haiku-20240307",
+                        max_tokens=1024,
+                        messages=[{"role": "user", "content": prompt}]
+                    )
+                    return response.content[0].text
 
         except Exception as e:
             print(f"Claude API Error: {e}")
@@ -206,6 +215,39 @@ def parse_intent(user_query):
     
     try:
         parsed = json.loads(response_json)
+        
+        # --- HARDCODED AMBIGUITY CHECK (Safety Net for Haiku) ---
+        # If the LLM guessed a product but the user was vague, override it.
+        # This prevents "12 sofas" from auto-selecting "Italian Leather".
+        query_lower = user_query.lower()
+        
+        # Define specific keywords that imply a specific choice
+        sofa_specifics = ["leather", "fabric", "modular", "sectional", "apartment", "3-seat", "luxury", "compact"]
+        desk_specifics = ["executive", "walnut", "standing", "adjustable", "writing", "compact"]
+        chair_specifics = ["office", "task", "dining", "accent", "mid-century", "minimalist", "ergonomic", "leather"]
+        
+        force_chat = False
+        clarify_msg = ""
+        
+        # Check Definite Ambiguity
+        if ("sofa" in query_lower or "couch" in query_lower) and not any(k in query_lower for k in sofa_specifics):
+            force_chat = True
+            clarify_msg += "Which type of sofa? We have Leather, Fabric, or Modular options.\n\n"
+            
+        if "desk" in query_lower and not any(k in query_lower for k in desk_specifics):
+            force_chat = True
+            clarify_msg += "Which type of desk? We have Executive, Standing, or Writing desks.\n\n"
+            
+        if "chair" in query_lower and not any(k in query_lower for k in chair_specifics):
+            if "desk" not in query_lower: # Don't double trigger for "desk and chair" if not specific
+                 force_chat = True
+                 clarify_msg += "Which type of chair? We have Office, Dining, or Accent chairs.\n\n"
+
+        if force_chat:
+            parsed["intent"] = "chat"
+            parsed["selected_products"] = []
+            parsed["conversational_reply"] = f"I'd love to help, but I need a few more details:\n\n{clarify_msg}Please be specific about the style or material you need."
+
         return parsed
     except:
         # Fallback for parsing errors
