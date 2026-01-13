@@ -1,45 +1,35 @@
-SKU,Name,Price,Category,Stock,Tags
-
-SOFA-001,Italian Leather Sectional Sofa,9800.00,Seating,12,"luxury couch, corner sofa, living room, premium leather"
-SOFA-002,Modern Fabric 3-Seat Sofa,6200.00,Seating,18,"comfortable couch, family room, textile sofa, contemporary"
-SOFA-003,Compact Apartment Sofa,4100.00,Seating,25,"small space couch, studio apartment, loveseat, city living"
-SOFA-004,Modular Luxury Sofa System,12500.00,Seating,8,"customizable seating, large sectional, high storage, designer"
-
-CHR-001,Executive Leather Office Chair,2800.00,Seating,40,"desk chair, ergonomic, boss chair, workspace"
-CHR-002,Mid-Century Accent Chair,1900.00,Seating,55,"lounge chair, retro style, reading nook, armless"
-CHR-003,Minimalist Dining Chair,850.00,Seating,120,"kitchen chair, wooden chair, simple seating, modern"
-CHR-004,Ergonomic Task Chair,1450.00,Seating,75,"work chair, lumbar support, breathable mesh, office"
-
-DSK-001,Solid Walnut Executive Desk,7200.00,Desks,10,"large wooden desk, ceo desk, office furniture, dark wood"
-DSK-002,Height-Adjustable Standing Desk,4800.00,Desks,22,"sit stand desk, ergonomic table, motorized desk, workspace"
-DSK-003,Compact Writing Desk,2600.00,Desks,35,"laptop desk, small office, home station, simple table"
-DSK-004,Conference Table (10–12 Seat),14500.00,Desks,4,"meeting table, boardroom, large table, gathering"
-
-TBL-001,Marble Coffee Table,3600.00,Tables,28,"living room center, stone table, luxury surface, lounge"
-TBL-002,Oak Side Table,1400.00,Tables,60,"end table, nightstand, wood accent, lamp stand"
-TBL-003,Glass Console Table,3200.00,Tables,20,"hallway table, transparent, entry table, modern display"
-
-STR-001,Custom Built-In Shelving (per unit),5200.00,Storage,15,"bookshelf, wall unit, display case, custom storage"
-STR-002,Wood Credenza,4600.00,Storage,18,"sideboard, buffet, file storage, office cabinet"
-STR-003,Metal Filing Cabinet,1800.00,Storage,70,"document storage, secure file, industrial cabinet, office organization"
-
-LGT-001,Designer Pendant Light,2400.00,Lighting,45,"hanging light, ceiling fixture, chandelier, dining light"
-LGT-002,Architectural Floor Lamp,3100.00,Lighting,30,"standing lamp, reading light, tall lamp, ground light, floor light"
-LGT-003,LED Recessed Lighting Kit,1200.00,Lighting,200,"ceiling lights, can lights, spot lights, dimmable"
-
-RUG-001,Handwoven Wool Area Rug,6800.00,Soft Goods,14,"floor mat, large carpet, textile flooring, cozy"
-RUG-002,Flatweave Office Rug,3400.00,Soft Goods,25,"commercial carpet, durable rug, workspace mat, low pile"
-CUR-001,Custom Linen Drapery (per window),1800.00,Soft Goods,999,"window treatment, curtains, blinds, fabric shade"
-
-SRV-001,Interior Design Consultation (Initial),950.00,Service,999,"expert advice, planning meeting, designer talk, layout help"
-SRV-002,Full-Space Design Fee (per room),4200.00,Service,999,"room makeover, complete design, decorating service"
-SRV-003,White-Glove Furniture Installation,1600.00,Service,999,"assembly service, setup, delivery, cleaning"
-SRV-004,On-Site Project Management (per day),2200.00,Service,999,"supervision, contractor management, site visit"
-
-ADD-001,Custom Finish Upgrade (per item),0.15,Add-On,999,"wood stain, metal polish, fabric choice, personalization"
-ADD-002,Rush Order Fee,0.20,Add-On,999,"expedite, fast delivery, priority shipping"
-ADD-003,Extended Warranty (5 Years),0.08,Add-On,999,"protection plan, insurance, repair coverage"
-
-DISC-001,Bulk Furniture Discount (>5 units),0.10,Discount,999,"volume price, wholesale, quantity deal"
-DISC-002,Large Project Discount (>50k),0.15,Discount,999,"enterprise deal, contract pricing, big budget"
-DISC-003,Trade Client Discount,0.12,Discount,999,"designer price, b2b discount, wholesale"
+SKU,Name,Price,Category,Stock,Tags,Inventory_Limit
+SOFA-001,Italian Leather Sectional Sofa,9800.00,Seating,12,"luxury couch, corner sofa, living room, premium leather",45
+SOFA-002,Modern Fabric 3-Seat Sofa,6200.00,Seating,18,"comfortable couch, family room, textile sofa, contemporary",3
+SOFA-003,Compact Apartment Sofa,4100.00,Seating,25,"small space couch, studio apartment, loveseat, city living",0
+SOFA-004,Modular Luxury Sofa System,12500.00,Seating,8,"customizable seating, large sectional, high storage, designer",17
+CHR-001,Executive Leather Office Chair,2800.00,Seating,40,"desk chair, ergonomic, boss chair, workspace",25
+CHR-002,Mid-Century Accent Chair,1900.00,Seating,55,"lounge chair, retro style, reading nook, armless",16
+CHR-003,Minimalist Dining Chair,850.00,Seating,120,"kitchen chair, wooden chair, simple seating, modern",35
+CHR-004,Ergonomic Task Chair,1450.00,Seating,75,"work chair, lumbar support, breathable mesh, office",14
+DSK-001,Solid Walnut Executive Desk,7200.00,Desks,10,"large wooden desk, ceo desk, office furniture, dark wood",25
+DSK-002,Height-Adjustable Standing Desk,4800.00,Desks,22,"sit stand desk, ergonomic table, motorized desk, workspace",21
+DSK-003,Compact Writing Desk,2600.00,Desks,35,"laptop desk, small office, home station, simple table",20
+DSK-004,Conference Table (10–12 Seat),14500.00,Desks,4,"meeting table, boardroom, large table, gathering",33
+TBL-001,Marble Coffee Table,3600.00,Tables,28,"living room center, stone table, luxury surface, lounge",17
+TBL-002,Oak Side Table,1400.00,Tables,60,"end table, nightstand, wood accent, lamp stand",21
+TBL-003,Glass Console Table,3200.00,Tables,20,"hallway table, transparent, entry table, modern display",16
+STR-001,Custom Built-In Shelving (per unit),5200.00,Storage,15,"bookshelf, wall unit, display case, custom storage",44
+STR-002,Wood Credenza,4600.00,Storage,18,"sideboard, buffet, file storage, office cabinet",22
+STR-003,Metal Filing Cabinet,1800.00,Storage,70,"document storage, secure file, industrial cabinet, office organization",24
+LGT-001,Designer Pendant Light,2400.00,Lighting,45,"hanging light, ceiling fixture, chandelier, dining light",49
+LGT-002,Architectural Floor Lamp,3100.00,Lighting,30,"standing lamp, reading light, tall lamp, ground light, floor light",10
+LGT-003,LED Recessed Lighting Kit,1200.00,Lighting,200,"ceiling lights, can lights, spot lights, dimmable",8
+RUG-001,Handwoven Wool Area Rug,6800.00,Soft Goods,14,"floor mat, large carpet, textile flooring, cozy",18
+RUG-002,Flatweave Office Rug,3400.00,Soft Goods,25,"commercial carpet, durable rug, workspace mat, low pile",19
+CUR-001,Custom Linen Drapery (per window),1800.00,Soft Goods,999,"window treatment, curtains, blinds, fabric shade",21
+SRV-001,Interior Design Consultation (Initial),950.00,Service,999,"expert advice, planning meeting, designer talk, layout help",15
+SRV-002,Full-Space Design Fee (per room),4200.00,Service,999,"room makeover, complete design, decorating service",8
+SRV-003,White-Glove Furniture Installation,1600.00,Service,999,"assembly service, setup, delivery, cleaning",49
+SRV-004,On-Site Project Management (per day),2200.00,Service,999,"supervision, contractor management, site visit",0
+ADD-001,Custom Finish Upgrade (per item),0.15,Add-On,999,"wood stain, metal polish, fabric choice, personalization",19
+ADD-002,Rush Order Fee,0.20,Add-On,999,"expedite, fast delivery, priority shipping",0
+ADD-003,Extended Warranty (5 Years),0.08,Add-On,999,"protection plan, insurance, repair coverage",12
+DISC-001,Bulk Furniture Discount (>5 units),0.10,Discount,999,"volume price, wholesale, quantity deal",0
+DISC-002,Large Project Discount (>50k),0.15,Discount,999,"enterprise deal, contract pricing, big budget",11
+DISC-003,Trade Client Discount,0.12,Discount,999,"designer price, b2b discount, wholesale",33

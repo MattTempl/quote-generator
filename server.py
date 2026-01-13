@@ -88,7 +88,9 @@ async def chat_endpoint(request: ChatRequest):
             
             if sku in catalog_map:
                 item = catalog_map[sku].copy()
-                stock_available = int(item.get('Stock', 0))
+                # Use the new Inventory_Limit column (fallback to Stock if missing, or 0)
+                limit_val = item.get('Inventory_Limit') or item.get('Stock', 0)
+                stock_available = int(limit_val)
                 
                 if qty > stock_available:
                     missing_stock.append(f"{item['Name']} (Requested: {qty}, Available: {stock_available})")
