@@ -188,6 +188,12 @@ def parse_intent(user_query):
        - Ask yourself: "Did the user specify 'Leather' or just 'Sofa'? Did they specify 'Executive' or just 'Desk'?"
        - If they just said "Desk" -> AMBIGUOUS. Return 'chat'.
        - Put this reasoning in the "thinking" field.
+
+    6. **NATURAL LANGUAGE ONLY**:
+       - When answering questions or making recommendations, write like a HUMAN.
+       - NEVER dump raw CSV fields like "SKU:", "Tags:", or "Category:".
+       - BAD: "Option 1: SKU-001 Name: Sofa Price: $900 Tags: leather"
+       - GOOD: "We have the Italian Leather Sofa for $9,800."
     
     CRITICAL: 
     - Return VALID JSON. Use \\n for line breaks.
