@@ -87,8 +87,7 @@
                     </div>
                 `;
             } else {
-                // Replace \n with <br> to preserve line breaks from API
-                div.innerHTML = text.replace(/\n/g, '<br>');
+                div.innerHTML = text; // Allow HTML for line breaks
             }
 
             chatContainer.appendChild(div);
