@@ -177,12 +177,12 @@ def parse_intent(user_query):
     
     CRITICAL: 
     - Return VALID JSON. Use \\n for line breaks.
-    - FORMATTING: When listing multiple products in "conversational_reply", YOU MUST USE BULLET POINTS (e.g. "\\n- Item 1\\n- Item 2"). Do NOT write run-on sentences.
+    - FORMATTING: When listing multiple products, use DOUBLE newlines for bullet points (e.g. "\\n\\n- Item 1\\n\\n- Item 2"). This ensures they don't get squashed together.
     
     JSON FORMAT:
     {{
         "intent": "product_selection" (OR "chat"),
-        "conversational_reply": "Here are the options:\\n- Option A ($100)\\n- Option B ($200)",
+        "conversational_reply": "Here are the options:\\n\\n- Option A ($100)\\n\\n- Option B ($200)",
         "selected_products": [
             {{ "sku": "SKU-001", "quantity": 2 }}
         ]
