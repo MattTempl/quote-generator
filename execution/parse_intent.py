@@ -61,23 +61,13 @@ def call_real_llm(prompt):
             import anthropic
             client = anthropic.Anthropic(api_key=claude_key)
             
-            # Try Premium Model First (Sonnet 3.5)
-            try:
-                response = client.messages.create(
-                    model="claude-3-5-sonnet-20241022",
-                    max_tokens=1024,
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                return response.content[0].text
-            except Exception as e:
-                # If Premium fails (e.g. 404 Not Found due to tier), fallback to Haiku
-                print(f"Sonnet Failed ({e}), falling back to Haiku...")
-                response = client.messages.create(
-                    model="claude-3-haiku-20240307",
-                    max_tokens=1024,
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                return response.content[0].text
+            # Use Haiku directly (Fast & Robust)
+            response = client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
 
         except Exception as e:
             print(f"Claude API Error: {e}")
