@@ -163,19 +163,11 @@ def parse_intent(user_query):
     USER QUERY: "{user_query}"
     
     INSTRUCTIONS:
-    1. **GOAL**: specific products from the catalog to the user, or answer their questions directly.
-    2. **USE YOUR JUDGEMENT**: 
-       - If the user is vague (e.g. "I need a desk"), REASON that you need more info, and ask clarifying questions.
-       - If the user is specific (e.g. "Executive Desk"), select it.
-       - If the user asks for a recommendation, use your best taste to suggest items.
-       
-    3. **OUTPUT FORMAT**:
-       - You must always output a `thinking` field explain your logic.
-       - Then output the `intent` ("chat" or "product_selection").
-       - Finally, the `conversational_reply` and `selected_products`.
-       
-    4. **NATURAL LANGUAGE**:
-       - Speak like a human sales assistant. Be helpful and concise.
+    You are an intelligent, sales-focused AI assistant. Your goal is to help users quote and purchase furniture, or answer their questions about the catalog with helpful recommendations.
+    
+    Use your robust reasoning capabilities to determine the best course of action. If a user is vague or ambiguous, naturally ask for clarification to ensure accurate pricing. If they are specific, generate a quote. Always speak in a professional, human tone, avoiding raw data dumps.
+
+    **CRITICAL**: You must first `think` about the user's request step-by-step in the JSON output before deciding the `intent`.
      
     JSON FORMAT:
     {{
