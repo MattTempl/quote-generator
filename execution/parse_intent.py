@@ -61,32 +61,29 @@ def call_real_llm(prompt):
             import anthropic
             client = anthropic.Anthropic(api_key=claude_key)
             
-            # Try Premium Model First (Sonnet 3.5 - Stable June Release)
+            text_response = ""
+            
+            # Try Premium Model First (Sonnet 3.5)
             try:
                 response = client.messages.create(
-                    model="claude-3-5-sonnet-20240620",
+                    model="claude-3-5-sonnet-20241022",
                     max_tokens=1024,
                     messages=[{"role": "user", "content": prompt}]
                 )
-                return response.content[0].text
+                text_response = response.content[0].text
             except Exception as e:
-                # If Premium fails (e.g. 404 Not Found due to tier), fallback to 'claude-3-sonnet-20240229' before Haiku
-                try:
-                    print(f"Sonnet 3.5 Failed ({e}), trying Sonnet 3.0...")
-                    response = client.messages.create(
-                        model="claude-3-sonnet-20240229",
-                        max_tokens=1024,
-                        messages=[{"role": "user", "content": prompt}]
-                    )
-                    return response.content[0].text
-                except Exception as e2:
-                    print(f"Sonnet 3.0 Failed ({e2}), falling back to Haiku...")
-                    response = client.messages.create(
-                        model="claude-3-haiku-20240307",
-                        max_tokens=1024,
-                        messages=[{"role": "user", "content": prompt}]
-                    )
-                    return response.content[0].text
+                # If Premium fails (e.g. 404 Not Found due to tier), fallback to Haiku
+                print(f"Sonnet Failed ({e}), falling back to Haiku...")
+                response = client.messages.create(
+                    model="claude-3-haiku-20240307",
+                    max_tokens=1024,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                text_response = response.content[0].text
+
+            # Cleanup JSON markdown if present
+            cleaned = text_response.replace('```json', '').replace('```', '').strip()
+            return cleaned
 
         except Exception as e:
             print(f"Claude API Error: {e}")
@@ -105,6 +102,10 @@ def call_real_llm(prompt):
             # for m in genai.list_models():
             #     print(m.name)
                 
+            # DEBUG: List models
+            # for m in genai.list_models():
+            #     print(m.name)
+                
             model = genai.GenerativeModel('gemini-flash-latest') 
             response = model.generate_content(prompt)
             # Cleanup JSON markdown if present
@@ -112,6 +113,8 @@ def call_real_llm(prompt):
             return text
         except Exception as e:
             print(f"Gemini API Error: {e}")
+            # return mock_llm_response(prompt) # DON'T FALLBACK SILENTLY
+            # return mock_llm_response(prompt) # DON'T FALLBACK SILENTLY
             return json.dumps({
                 "intent": "chat", 
                 "conversational_reply": f"System Error: {str(e)}", 
@@ -163,56 +166,50 @@ def parse_intent(user_query):
     USER QUERY: "{user_query}"
     
     INSTRUCTIONS:
-    You are an intelligent, sales-focused AI assistant. Your goal is to help users quote and purchase furniture, or answer their questions about the catalog with helpful recommendations.
+    1. You are "QuoteBot", a helpful, professional, slightly witty Sales Engineer.
+    2. Analyze the user's request.
+    3. If the request is AMBIGUOUS (e.g. "I need 12 couches" but you have multiple types), set intent to "chat" and ask a clarifying question.
+    4. If the request is EXPLORATORY (e.g. "What types of sofas do you have?", "Show me your desks"), set intent to "chat".
+       - Do NOT select products in the JSON.
+       - Just describe the options in the "conversational_reply".
+    5. If they are chatting (e.g. "hello", "who are you"), be friendly but pivot back to selling furniture.
+    6. ONLY if they explicitly ask for a quote, price, or specific items to buy (e.g. "I want the leather sofa", "Quote me for 2 desks"), set intent to "product_selection" and fill "selected_products".
+    7. Return a JSON object.
     
-    Use your robust reasoning capabilities to determine the best course of action. If a user is vague or ambiguous, naturally ask for clarification to ensure accurate pricing. If they are specific, generate a quote. Always speak in a professional, human tone, avoiding raw data dumps.
-
-    **CRITICAL**: You must return a VALID JSON object. Do not include any text outside the JSON. First `think` about the reasoning, then determine the `intent`.
-     
+    IMPORTANT: Your response must be Valid JSON. 
+    - Do NOT use literal newlines inside strings. Use \\n for line breaks.
+    - Escape all special characters.
+    
     JSON FORMAT:
     {{
-        "thinking": "User asked for 'desk' but didn't specify type. I should ask for clarification.",
-        "intent": "chat",
-        "conversational_reply": "We have Executive and Standing desks. Which do you prefer?",
-        "selected_products": []
+        "intent": "product_selection" (OR "chat" if no products needed),
+        "conversational_reply": "Your friendly text response here...",
+        "selected_products": [
+            {{ "sku": "SKU-001", "quantity": 2 }}
+        ]
     }}
     
     EXAMPLES:
     User: "Who are you?"
-    Response: {{ "thinking": "General question.", "intent": "chat", "conversational_reply": "I'm QuoteBot.", "selected_products": [] }}
+    Response: {{ "intent": "chat", "conversational_reply": "I'm QuoteBot, your digital sales engineer. I can't feel emotions, but I love a good spreadsheet. Looking for some office furniture today?", "selected_products": [] }}
     
     User: "I need 12 couches"
-    Response: {{ "thinking": "User asked for 'couches' (generic). Ambiguous.", "intent": "chat", "conversational_reply": "Which type? Leather, Fabric, or Modular?", "selected_products": [] }}
+    Response: {{ "intent": "chat", "conversational_reply": "I'd accept that order, but I have a few options. Are you looking for the leather executive sofas or the fabric reception couches?", "selected_products": [] }}
 
-    User: "Price for 2 desks and a sofa"
-    Response: {{ "thinking": "User asked for 'desks' and 'sofa' (generic). Ambiguous.", "intent": "chat", "conversational_reply": "Which desks/sofa? Executive or Standing? Leather or Fabric?", "selected_products": [] }}
+    User: "What sofas do you have?"
+    Response: {{ "intent": "chat", "conversational_reply": "We have a great selection. Our top sellers are the Italian Leather Sectional (SKU SOFA-001) for luxury spaces, and the Modern Fabric Sofa (SKU SOFA-002) for a cozier feel.", "selected_products": [] }}
 
-    User: "I need the Executive Desk"
-    Response: {{ "thinking": "User specified 'Executive'. Clear match.", "intent": "product_selection", "conversational_reply": "Here is the quote.", "selected_products": [...] }}
+    User: "I need a desk"
+    Response: {{ "intent": "product_selection", "conversational_reply": "Excellent choice. Here is a solid option from our catalog.", "selected_products": [...] }}
     """
     
     # Call the LLM with the full context
     response_json = call_real_llm(system_prompt)
     
-    # Remove markdown code blocks if present
-    text = response_json.replace('```json', '').replace('```', '')
-    
     try:
-        # Attempt direct parse first
-        parsed = json.loads(text)
+        parsed = json.loads(response_json)
         return parsed
     except:
-        # If direct parse fails, try to find the JSON object using regex
-        # This handles cases where the LLM adds preamble text found in Haiku
-        import re
-        match = re.search(r'(\{.*\})', text, re.DOTALL)
-        if match:
-             try:
-                 parsed = json.loads(match.group(1))
-                 return parsed
-             except:
-                 pass
-                 
         # Fallback for parsing errors
         return {
             "intent": "chat", 
