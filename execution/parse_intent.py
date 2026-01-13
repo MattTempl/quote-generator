@@ -182,6 +182,12 @@ def parse_intent(user_query):
     4. TONE & TRUTH:
        - Concise, direct, and human. NO AI FLUFF.
        - Use ONLY data from the catalog. DO NOT invent features/stock.
+       
+    5. **CHAIN OF THOUGHT** (CRITICAL):
+       - Before returning JSON, you must THINK.
+       - Ask yourself: "Did the user specify 'Leather' or just 'Sofa'? Did they specify 'Executive' or just 'Desk'?"
+       - If they just said "Desk" -> AMBIGUOUS. Return 'chat'.
+       - Put this reasoning in the "thinking" field.
     
     CRITICAL: 
     - Return VALID JSON. Use \\n for line breaks.
@@ -189,25 +195,24 @@ def parse_intent(user_query):
     
     JSON FORMAT:
     {{
-        "intent": "product_selection" (OR "chat"),
-        "conversational_reply": "Here are the options:\\n\\n- Option A ($100)\\n\\n- Option B ($200)",
-        "selected_products": [
-            {{ "sku": "SKU-001", "quantity": 2 }}
-        ]
+        "thinking": "User asked for 'desk' but didn't specify Executive or Standing. This is ambiguous.",
+        "intent": "chat",
+        "conversational_reply": "Which desk type?",
+        "selected_products": []
     }}
     
     EXAMPLES:
     User: "Who are you?"
-    Response: {{ "intent": "chat", "conversational_reply": "I'm QuoteBot. I generate instant quotes for furniture.", "selected_products": [] }}
+    Response: {{ "thinking": "General question.", "intent": "chat", "conversational_reply": "I'm QuoteBot.", "selected_products": [] }}
     
     User: "I need 12 couches"
-    Response: {{ "intent": "chat", "conversational_reply": "Which type? We have Leather, Fabric, or Modular.", "selected_products": [] }}
+    Response: {{ "thinking": "User asked for 'couches' (generic). Ambiguous.", "intent": "chat", "conversational_reply": "Which type? Leather, Fabric, or Modular?", "selected_products": [] }}
 
     User: "Price for 2 desks and a sofa"
-    Response: {{ "intent": "chat", "conversational_reply": "Which desks and sofa? We have Executive or Standing desks, and Leather or Fabric sofas.", "selected_products": [] }}
+    Response: {{ "thinking": "User asked for 'desks' and 'sofa' (generic). Ambiguous.", "intent": "chat", "conversational_reply": "Which desks/sofa? Executive or Standing? Leather or Fabric?", "selected_products": [] }}
 
     User: "I need the Executive Desk"
-    Response: {{ "intent": "product_selection", "conversational_reply": "Here is the quote for the Executive Desk.", "selected_products": [...] }}
+    Response: {{ "thinking": "User specified 'Executive'. Clear match.", "intent": "product_selection", "conversational_reply": "Here is the quote.", "selected_products": [...] }}
     """
     
     # Call the LLM with the full context
@@ -215,39 +220,6 @@ def parse_intent(user_query):
     
     try:
         parsed = json.loads(response_json)
-        
-        # --- HARDCODED AMBIGUITY CHECK (Safety Net for Haiku) ---
-        # If the LLM guessed a product but the user was vague, override it.
-        # This prevents "12 sofas" from auto-selecting "Italian Leather".
-        query_lower = user_query.lower()
-        
-        # Define specific keywords that imply a specific choice
-        sofa_specifics = ["leather", "fabric", "modular", "sectional", "apartment", "3-seat", "luxury", "compact"]
-        desk_specifics = ["executive", "walnut", "standing", "adjustable", "writing", "compact"]
-        chair_specifics = ["office", "task", "dining", "accent", "mid-century", "minimalist", "ergonomic", "leather"]
-        
-        force_chat = False
-        clarify_msg = ""
-        
-        # Check Definite Ambiguity
-        if ("sofa" in query_lower or "couch" in query_lower) and not any(k in query_lower for k in sofa_specifics):
-            force_chat = True
-            clarify_msg += "Which type of sofa? We have Leather, Fabric, or Modular options.\n\n"
-            
-        if "desk" in query_lower and not any(k in query_lower for k in desk_specifics):
-            force_chat = True
-            clarify_msg += "Which type of desk? We have Executive, Standing, or Writing desks.\n\n"
-            
-        if "chair" in query_lower and not any(k in query_lower for k in chair_specifics):
-            if "desk" not in query_lower: # Don't double trigger for "desk and chair" if not specific
-                 force_chat = True
-                 clarify_msg += "Which type of chair? We have Office, Dining, or Accent chairs.\n\n"
-
-        if force_chat:
-            parsed["intent"] = "chat"
-            parsed["selected_products"] = []
-            parsed["conversational_reply"] = f"I'd love to help, but I need a few more details:\n\n{clarify_msg}Please be specific about the style or material you need."
-
         return parsed
     except:
         # Fallback for parsing errors
