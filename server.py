@@ -77,10 +77,14 @@ async def chat_endpoint(request: ChatRequest):
                 if file.endswith('.csv'):
                     with open(os.path.join(root, file), 'r') as f:
                         reader = csv.DictReader(f)
+                        # Clean fieldnames (strip whitespace) if needed
+                        if reader.fieldnames:
+                            reader.fieldnames = [name.strip() for name in reader.fieldnames]
+                            
                         for row in reader:
                             catalog_map[row['SKU']] = row
 
-        missing_stock = []
+        missing_stock_warnings = []
         
         for selection in intent_data.get("selected_products", []):
             sku = selection.get("sku")
@@ -93,16 +97,17 @@ async def chat_endpoint(request: ChatRequest):
                 stock_available = int(limit_val)
                 
                 if qty > stock_available:
-                    missing_stock.append(f"{item['Name']} (Requested: {qty}, Available: {stock_available})")
-                else:
-                    item['quantity'] = qty
-                    found_items.append(item)
+                    # Mark item as Backordered / OOS but still include it
+                    item['Name'] += f" (OUT OF STOCK - Only {stock_available} available)"
+                    missing_stock_warnings.append(f"{item['Name']}")
+                
+                item['quantity'] = qty
+                found_items.append(item)
 
-        if missing_stock:
-            return {
-                "message": f"I cannot complete that quote due to inventory limits. The following items are low on stock: {', '.join(missing_stock)}. Please adjust your quantity.",
-                "quote": None
-            }
+        # Append warnings to the conversational reply
+        final_message = intent_data.get("conversational_reply", f"I found {len(found_items)} items for you.")
+        if missing_stock_warnings:
+            final_message = f"⚠️ Note: Some items are out of stock or have limited availability.\n\n" + final_message
 
         if not found_items:
             return {
@@ -124,7 +129,7 @@ async def chat_endpoint(request: ChatRequest):
         quote_data = calculate_quote(calc_input)
         
         return {
-            "message": intent_data.get("conversational_reply", f"I found {len(found_items)} items for you."),
+            "message": final_message,
             "data": quote_data
         }
 
