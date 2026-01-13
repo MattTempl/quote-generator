@@ -80,14 +80,27 @@ async def chat_endpoint(request: ChatRequest):
                         for row in reader:
                             catalog_map[row['SKU']] = row
 
+        missing_stock = []
+        
         for selection in intent_data.get("selected_products", []):
             sku = selection.get("sku")
             qty = selection.get("quantity", 1)
             
             if sku in catalog_map:
                 item = catalog_map[sku].copy()
-                item['quantity'] = qty
-                found_items.append(item)
+                stock_available = int(item.get('Stock', 0))
+                
+                if qty > stock_available:
+                    missing_stock.append(f"{item['Name']} (Requested: {qty}, Available: {stock_available})")
+                else:
+                    item['quantity'] = qty
+                    found_items.append(item)
+
+        if missing_stock:
+            return {
+                "message": f"I cannot complete that quote due to inventory limits. The following items are low on stock: {', '.join(missing_stock)}. Please adjust your quantity.",
+                "quote": None
+            }
 
         if not found_items:
             return {
