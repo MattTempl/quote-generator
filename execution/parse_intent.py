@@ -163,47 +163,25 @@ def parse_intent(user_query):
     USER QUERY: "{user_query}"
     
     INSTRUCTIONS:
-    1. **PRIORITY #1: NO GUESSING.**
-       - If the user asks for a generic category (e.g. "sofa", "desk", "chair", "lamp") and does NOT specify a type/material/style:
-       - **STOP.** Do NOT select products.
-       - Set intent to "chat".
-       - In "conversational_reply", ask a clarifying question listing the options (e.g. "Which type? We have Executive, Standing, or Writing desks.").
-       - Return "selected_products": [].
+    1. **GOAL**: specific products from the catalog to the user, or answer their questions directly.
+    2. **USE YOUR JUDGEMENT**: 
+       - If the user is vague (e.g. "I need a desk"), REASON that you need more info, and ask clarifying questions.
+       - If the user is specific (e.g. "Executive Desk"), select it.
+       - If the user asks for a recommendation, use your best taste to suggest items.
        
-    2. **PRIORITY #2: EXPLORATORY QUESTIONS.**
-       - If user asks generic questions (e.g. "What sofas do you have?"), DO NOT SELECT PRODUCTS.
-       - Set intent to "chat".
-       - List options with prices.
-
-    3. **PRODUCT SELECTION:**
-       - ONLY if the user specifies a type (e.g. "Leather Sofa", "Executive Desk").
-       - Select the BEST matching products.
-    
-    4. TONE & TRUTH:
-       - Concise, direct, and human. NO AI FLUFF.
-       - Use ONLY data from the catalog. DO NOT invent features/stock.
+    3. **OUTPUT FORMAT**:
+       - You must always output a `thinking` field explain your logic.
+       - Then output the `intent` ("chat" or "product_selection").
+       - Finally, the `conversational_reply` and `selected_products`.
        
-    5. **CHAIN OF THOUGHT** (CRITICAL):
-       - Before returning JSON, you must THINK.
-       - Ask yourself: "Did the user specify 'Leather' or just 'Sofa'? Did they specify 'Executive' or just 'Desk'?"
-       - If they just said "Desk" -> AMBIGUOUS. Return 'chat'.
-       - Put this reasoning in the "thinking" field.
-
-    6. **NATURAL LANGUAGE ONLY**:
-       - When answering questions or making recommendations, write like a HUMAN.
-       - NEVER dump raw CSV fields like "SKU:", "Tags:", or "Category:".
-       - BAD: "Option 1: SKU-001 Name: Sofa Price: $900 Tags: leather"
-       - GOOD: "We have the Italian Leather Sofa for $9,800."
-    
-    CRITICAL: 
-    - Return VALID JSON. Use \\n for line breaks.
-    - FORMATTING: When listing multiple products, use DOUBLE newlines for bullet points (e.g. "\\n\\n- Item 1\\n\\n- Item 2"). This ensures they don't get squashed together.
-    
+    4. **NATURAL LANGUAGE**:
+       - Speak like a human sales assistant. Be helpful and concise.
+     
     JSON FORMAT:
     {{
-        "thinking": "User asked for 'desk' but didn't specify Executive or Standing. This is ambiguous.",
+        "thinking": "User asked for 'desk' but didn't specify type. I should ask for clarification.",
         "intent": "chat",
-        "conversational_reply": "Which desk type?",
+        "conversational_reply": "We have Executive and Standing desks. Which do you prefer?",
         "selected_products": []
     }}
     
