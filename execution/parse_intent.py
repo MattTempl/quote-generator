@@ -194,10 +194,25 @@ def parse_intent(user_query):
     # Call the LLM with the full context
     response_json = call_real_llm(system_prompt)
     
+    # Remove markdown code blocks if present
+    text = response_json.replace('```json', '').replace('```', '')
+    
     try:
-        parsed = json.loads(response_json)
+        # Attempt direct parse first
+        parsed = json.loads(text)
         return parsed
     except:
+        # If direct parse fails, try to find the JSON object using regex
+        # This handles cases where the LLM adds preamble text found in Haiku
+        import re
+        match = re.search(r'(\{.*\})', text, re.DOTALL)
+        if match:
+             try:
+                 parsed = json.loads(match.group(1))
+                 return parsed
+             except:
+                 pass
+                 
         # Fallback for parsing errors
         return {
             "intent": "chat", 
