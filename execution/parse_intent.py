@@ -175,12 +175,14 @@ def parse_intent(user_query):
     5. If they are chatting, be friendly.
     6. If they want to BUY/QUOTE specific products, select the BEST matching products from the catalog.
     
-    CRITICAL: Return VALID JSON. Do not include real newlines inside string values. Use \\n for line breaks.
+    CRITICAL: 
+    - Return VALID JSON. Use \\n for line breaks.
+    - FORMATTING: When listing multiple products in "conversational_reply", YOU MUST USE BULLET POINTS (e.g. "\\n- Item 1\\n- Item 2"). Do NOT write run-on sentences.
     
     JSON FORMAT:
     {{
         "intent": "product_selection" (OR "chat"),
-        "conversational_reply": "Text response here... use \\n for newlines.",
+        "conversational_reply": "Here are the options:\\n- Option A ($100)\\n- Option B ($200)",
         "selected_products": [
             {{ "sku": "SKU-001", "quantity": 2 }}
         ]
