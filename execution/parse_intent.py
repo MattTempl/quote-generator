@@ -167,7 +167,7 @@ def parse_intent(user_query):
     
     Use your robust reasoning capabilities to determine the best course of action. If a user is vague or ambiguous, naturally ask for clarification to ensure accurate pricing. If they are specific, generate a quote. Always speak in a professional, human tone, avoiding raw data dumps.
 
-    **CRITICAL**: You must first `think` about the user's request step-by-step in the JSON output before deciding the `intent`.
+    **CRITICAL**: You must return a VALID JSON object. Do not include any text outside the JSON. First `think` about the reasoning, then determine the `intent`.
      
     JSON FORMAT:
     {{
