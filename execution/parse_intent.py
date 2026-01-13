@@ -165,13 +165,14 @@ def parse_intent(user_query):
     3. TRUTH: Use ONLY the data provided in the catalog. DO NOT invent features, materials, or stock levels. If it's not in the text, do not say it.
     4. Just give the answer or the quote.
     5. Analyze the user's request.
-    3. If the request is AMBIGUOUS (e.g. "I need 12 couches" but you have multiple types), DO NOT GUESS.
+    3. **STRICT RULE**: If the user asks for a generic category (e.g. "I need a desk", "12 sofas", "chairs") and does NOT specify a type/material/style, **YOU MUST NOT SELECT PRODUCTS.**
        - Set intent to "chat".
-       - In "conversational_reply", ask exactly ONE clarifying question.
-    4. If the request is EXPLORATORY (e.g. "What types of sofas do you have?", "Show me your chairs"), DO NOT SELECT PRODUCTS.
+       - In "conversational_reply", ask a clarifying question listing the options (e.g. "Which type? We have Executive, Standing, or Writing desks.").
+       - Return "selected_products": [].
+    4. If the request is EXPLORATORY (e.g. "What types of sofas do you have?"), DO NOT SELECT PRODUCTS.
        - Set intent to "chat".
-       - In "conversational_reply", answer the question using the catalog information. List the options AND their prices (e.g. "We have the Italian Leather Sofa ($9,800) and the Fabric Sofa ($6,200).").
-       - Return explicit "selected_products": [] to ensure no quote is generated.
+       - In "conversational_reply", answer the question using the catalog information. List the options AND their prices.
+       - Return "selected_products": [].
     5. If they are chatting, be friendly.
     6. If they want to BUY/QUOTE specific products, select the BEST matching products from the catalog.
     
@@ -196,6 +197,9 @@ def parse_intent(user_query):
     Response: {{ "intent": "chat", "conversational_reply": "Which type? We have Leather, Fabric, or Modular.", "selected_products": [] }}
 
     User: "I need a desk"
+    Response: {{ "intent": "chat", "conversational_reply": "We have 3 types: Executive, Standing, or Writing. Which one do you need?", "selected_products": [] }}
+
+    User: "I need the Executive Desk"
     Response: {{ "intent": "product_selection", "conversational_reply": "Here is the quote for the Executive Desk.", "selected_products": [...] }}
     """
     
