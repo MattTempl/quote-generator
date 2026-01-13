@@ -96,10 +96,6 @@ def call_real_llm(prompt):
             # for m in genai.list_models():
             #     print(m.name)
                 
-            # DEBUG: List models
-            # for m in genai.list_models():
-            #     print(m.name)
-                
             model = genai.GenerativeModel('gemini-flash-latest') 
             response = model.generate_content(prompt)
             # Cleanup JSON markdown if present
@@ -107,8 +103,6 @@ def call_real_llm(prompt):
             return text
         except Exception as e:
             print(f"Gemini API Error: {e}")
-            # return mock_llm_response(prompt) # DON'T FALLBACK SILENTLY
-            # return mock_llm_response(prompt) # DON'T FALLBACK SILENTLY
             return json.dumps({
                 "intent": "chat", 
                 "conversational_reply": f"System Error: {str(e)}", 
@@ -160,21 +154,25 @@ def parse_intent(user_query):
     USER QUERY: "{user_query}"
     
     INSTRUCTIONS:
-    1. You are "QuoteBot", a professional sales assistant.
-    2. TONE: Concise, direct, and human. STRICTLY AVOID "AI fluff".
-    3. TRUTH: Use ONLY the data provided in the catalog. DO NOT invent features, materials, or stock levels. If it's not in the text, do not say it.
-    4. Just give the answer or the quote.
-    5. Analyze the user's request.
-    3. **STRICT RULE**: If the user asks for a generic category (e.g. "I need a desk", "12 sofas", "chairs") and does NOT specify a type/material/style, **YOU MUST NOT SELECT PRODUCTS.**
+    1. **PRIORITY #1: NO GUESSING.**
+       - If the user asks for a generic category (e.g. "sofa", "desk", "chair", "lamp") and does NOT specify a type/material/style:
+       - **STOP.** Do NOT select products.
        - Set intent to "chat".
        - In "conversational_reply", ask a clarifying question listing the options (e.g. "Which type? We have Executive, Standing, or Writing desks.").
        - Return "selected_products": [].
-    4. If the request is EXPLORATORY (e.g. "What types of sofas do you have?"), DO NOT SELECT PRODUCTS.
+       
+    2. **PRIORITY #2: EXPLORATORY QUESTIONS.**
+       - If user asks generic questions (e.g. "What sofas do you have?"), DO NOT SELECT PRODUCTS.
        - Set intent to "chat".
-       - In "conversational_reply", answer the question using the catalog information. List the options AND their prices.
-       - Return "selected_products": [].
-    5. If they are chatting, be friendly.
-    6. If they want to BUY/QUOTE specific products, select the BEST matching products from the catalog.
+       - List options with prices.
+
+    3. **PRODUCT SELECTION:**
+       - ONLY if the user specifies a type (e.g. "Leather Sofa", "Executive Desk").
+       - Select the BEST matching products.
+    
+    4. TONE & TRUTH:
+       - Concise, direct, and human. NO AI FLUFF.
+       - Use ONLY data from the catalog. DO NOT invent features/stock.
     
     CRITICAL: 
     - Return VALID JSON. Use \\n for line breaks.
@@ -196,8 +194,8 @@ def parse_intent(user_query):
     User: "I need 12 couches"
     Response: {{ "intent": "chat", "conversational_reply": "Which type? We have Leather, Fabric, or Modular.", "selected_products": [] }}
 
-    User: "I need a desk"
-    Response: {{ "intent": "chat", "conversational_reply": "We have 3 types: Executive, Standing, or Writing. Which one do you need?", "selected_products": [] }}
+    User: "Price for 2 desks and a sofa"
+    Response: {{ "intent": "chat", "conversational_reply": "Which desks and sofa? We have Executive or Standing desks, and Leather or Fabric sofas.", "selected_products": [] }}
 
     User: "I need the Executive Desk"
     Response: {{ "intent": "product_selection", "conversational_reply": "Here is the quote for the Executive Desk.", "selected_products": [...] }}
