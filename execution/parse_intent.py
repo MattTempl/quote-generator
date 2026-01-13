@@ -170,17 +170,17 @@ def parse_intent(user_query):
        - In "conversational_reply", ask exactly ONE clarifying question.
     4. If the request is EXPLORATORY (e.g. "What types of sofas do you have?", "Show me your chairs"), DO NOT SELECT PRODUCTS.
        - Set intent to "chat".
-       - In "conversational_reply", answer the question using the catalog information (e.g. "We have Italian Leather, Fabric, and Modular sofas.").
+       - In "conversational_reply", answer the question using the catalog information. List the options AND their prices (e.g. "We have the Italian Leather Sofa ($9,800) and the Fabric Sofa ($6,200).").
        - Return explicit "selected_products": [] to ensure no quote is generated.
-    5. If they are chatting (e.g. "hello", "who are you"), be friendly but pivot back to selling furniture.
+    5. If they are chatting, be friendly.
     6. If they want to BUY/QUOTE specific products, select the BEST matching products from the catalog.
-    5. If they want products and it is specific enough, select the BEST matching products from the catalog.
-    6. Return a JSON object.
+    
+    CRITICAL: Return VALID JSON. Do not include real newlines inside string values. Use \\n for line breaks.
     
     JSON FORMAT:
     {{
-        "intent": "product_selection" (OR "chat" if no products needed),
-        "conversational_reply": "Your friendly text response here...",
+        "intent": "product_selection" (OR "chat"),
+        "conversational_reply": "Text response here... use \\n for newlines.",
         "selected_products": [
             {{ "sku": "SKU-001", "quantity": 2 }}
         ]
