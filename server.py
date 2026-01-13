@@ -84,7 +84,7 @@ async def chat_endpoint(request: ChatRequest):
                         for row in reader:
                             catalog_map[row['SKU']] = row
 
-        missing_stock_warnings = []
+        missing_stock = []
         
         for selection in intent_data.get("selected_products", []):
             sku = selection.get("sku")
@@ -97,17 +97,16 @@ async def chat_endpoint(request: ChatRequest):
                 stock_available = int(limit_val)
                 
                 if qty > stock_available:
-                    # Mark item as Backordered / OOS but still include it
-                    item['Name'] += f" (OUT OF STOCK - Only {stock_available} available)"
-                    missing_stock_warnings.append(f"{item['Name']}")
-                
-                item['quantity'] = qty
-                found_items.append(item)
+                    missing_stock.append(f"{item['Name']} (Requested: {qty}, Available: {stock_available})")
+                else:
+                    item['quantity'] = qty
+                    found_items.append(item)
 
-        # Append warnings to the conversational reply
-        final_message = intent_data.get("conversational_reply", f"I found {len(found_items)} items for you.")
-        if missing_stock_warnings:
-            final_message = f"⚠️ Note: Some items are out of stock or have limited availability.\n\n" + final_message
+        if missing_stock:
+            return {
+                "message": f"I cannot complete that quote due to inventory limits. The following items are low on stock: {', '.join(missing_stock)}. Please adjust your quantity.",
+                "quote": None
+            }
 
         if not found_items:
             return {
@@ -129,7 +128,7 @@ async def chat_endpoint(request: ChatRequest):
         quote_data = calculate_quote(calc_input)
         
         return {
-            "message": final_message,
+            "message": intent_data.get("conversational_reply", f"I found {len(found_items)} items for you."),
             "data": quote_data
         }
 

@@ -61,8 +61,6 @@ def call_real_llm(prompt):
             import anthropic
             client = anthropic.Anthropic(api_key=claude_key)
             
-            text_response = ""
-            
             # Try Premium Model First (Sonnet 3.5)
             try:
                 response = client.messages.create(
@@ -70,7 +68,7 @@ def call_real_llm(prompt):
                     max_tokens=1024,
                     messages=[{"role": "user", "content": prompt}]
                 )
-                text_response = response.content[0].text
+                return response.content[0].text
             except Exception as e:
                 # If Premium fails (e.g. 404 Not Found due to tier), fallback to Haiku
                 print(f"Sonnet Failed ({e}), falling back to Haiku...")
@@ -79,11 +77,7 @@ def call_real_llm(prompt):
                     max_tokens=1024,
                     messages=[{"role": "user", "content": prompt}]
                 )
-                text_response = response.content[0].text
-
-            # Cleanup JSON markdown if present
-            cleaned = text_response.replace('```json', '').replace('```', '').strip()
-            return cleaned
+                return response.content[0].text
 
         except Exception as e:
             print(f"Claude API Error: {e}")
@@ -168,17 +162,12 @@ def parse_intent(user_query):
     INSTRUCTIONS:
     1. You are "QuoteBot", a helpful, professional, slightly witty Sales Engineer.
     2. Analyze the user's request.
-    3. If the request is AMBIGUOUS (e.g. "I need 12 couches" but you have multiple types), set intent to "chat" and ask a clarifying question.
-    4. If the request is EXPLORATORY (e.g. "What types of sofas do you have?", "Show me your desks"), set intent to "chat".
-       - Do NOT select products in the JSON.
-       - Just describe the options in the "conversational_reply".
-    5. If they are chatting (e.g. "hello", "who are you"), be friendly but pivot back to selling furniture.
-    6. ONLY if they explicitly ask for a quote, price, or specific items to buy (e.g. "I want the leather sofa", "Quote me for 2 desks"), set intent to "product_selection" and fill "selected_products".
-    7. Return a JSON object.
-    
-    IMPORTANT: Your response must be Valid JSON. 
-    - Do NOT use literal newlines inside strings. Use \\n for line breaks.
-    - Escape all special characters.
+    3. If the request is AMBIGUOUS (e.g. "I need 12 couches" but you have multiple types, or "furnish a room" without budget/style), DO NOT GUESS.
+       - Set intent to "chat".
+       - In "conversational_reply", ask exactly ONE clarifying question to narrow it down.
+    4. If they are chatting (e.g. "hello", "who are you"), be friendly but pivot back to selling furniture.
+    5. If they want products and it is specific enough, select the BEST matching products from the catalog.
+    6. Return a JSON object.
     
     JSON FORMAT:
     {{
@@ -195,9 +184,6 @@ def parse_intent(user_query):
     
     User: "I need 12 couches"
     Response: {{ "intent": "chat", "conversational_reply": "I'd accept that order, but I have a few options. Are you looking for the leather executive sofas or the fabric reception couches?", "selected_products": [] }}
-
-    User: "What sofas do you have?"
-    Response: {{ "intent": "chat", "conversational_reply": "We have a great selection. Our top sellers are the Italian Leather Sectional (SKU SOFA-001) for luxury spaces, and the Modern Fabric Sofa (SKU SOFA-002) for a cozier feel.", "selected_products": [] }}
 
     User: "I need a desk"
     Response: {{ "intent": "product_selection", "conversational_reply": "Excellent choice. Here is a solid option from our catalog.", "selected_products": [...] }}
